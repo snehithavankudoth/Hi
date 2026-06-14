@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A Letter For You 💛</title>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;600;700&family=Lora:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;width:100%;overflow-x:hidden}
+body{background:#1a0a00;font-family:'Lora',serif;-webkit-tap-highlight-color:transparent}
+
+#bg-gradient{position:fixed;inset:0;background:radial-gradient(ellipse at 30% 20%,#3D1C02 0%,#1A0800 50%,#0D0400 100%);z-index:0}
+canvas#particles{position:fixed;inset:0;z-index:1;pointer-events:none}
+
+#scene{position:relative;min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;z-index:10;padding:24px}
+
+.to-from{text-align:center;color:#F0D49A;font-family:'Dancing Script',cursive;font-size:16px;line-height:2;text-shadow:0 0 20px rgba(201,153,58,0.5);margin-bottom:24px}
+.to-from strong{font-size:18px;color:#F5DFA0}
+
+#envelope-wrap{position:relative;width:280px;height:190px;cursor:pointer;animation:floatEnv 3s ease-in-out infinite;-webkit-tap-highlight-color:transparent}
+#envelope-wrap:active{transform:scale(0.97)}
+@keyframes floatEnv{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-14px) rotate(1deg)}}
+
+.env-body{position:absolute;bottom:0;width:280px;height:170px;background:linear-gradient(135deg,#FDF0DC 0%,#F5E4C0 50%,#EDD9A3 100%);border-radius:4px 4px 10px 10px;box-shadow:0 8px 40px rgba(201,153,58,0.45),0 2px 12px rgba(0,0,0,0.35)}
+.env-flap{position:absolute;top:0;left:0;width:280px;height:100px;clip-path:polygon(0 0,50% 68%,100% 0);background:linear-gradient(160deg,#F5E4C0,#EDD9A3);transform-origin:top center;transition:transform 0.9s cubic-bezier(0.4,0,0.2,1);z-index:5}
+.env-flap.open{transform:rotateX(180deg)}
+.env-left{position:absolute;bottom:0;left:0;width:0;height:0;border-style:solid;border-width:0 0 85px 140px;border-color:transparent transparent #E8D49A transparent}
+.env-right{position:absolute;bottom:0;right:0;width:0;height:0;border-style:solid;border-width:0 140px 85px 0;border-color:transparent #E8D49A transparent transparent}
+.env-seal{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:40px;height:40px;background:radial-gradient(circle,#C9993A,#A07820);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 2px 10px rgba(0,0,0,0.35);z-index:6;transition:opacity 0.3s}
+.env-glow{position:absolute;inset:-24px;border-radius:50%;background:radial-gradient(ellipse,rgba(201,153,58,0.28) 0%,transparent 70%);animation:glowPulse 2.2s ease-in-out infinite;z-index:-1}
+@keyframes glowPulse{0%,100%{opacity:0.5;transform:scale(1)}50%{opacity:1;transform:scale(1.12)}}
+
+#click-hint{color:#F0D49A;font-family:'Dancing Script',cursive;font-size:14px;margin-top:20px;opacity:0.7;animation:blink 2s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:0.3}50%{opacity:0.9}}
+
+/* STORY SCREENS */
+#story{display:none;position:fixed;inset:0;z-index:50;background:linear-gradient(160deg,#2A1000,#1A0800);align-items:center;justify-content:center;flex-direction:column;padding:24px}
+.story-screen{display:none;text-align:center;max-width:380px;width:100%}
+.story-screen.active{display:flex;flex-direction:column;align-items:center;gap:18px;animation:fadeUp 0.6s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+.story-icon{font-size:52px;line-height:1}
+.story-title{font-family:'Dancing Script',cursive;font-size:30px;color:#F5DFA0;line-height:1.4;text-shadow:0 0 24px rgba(245,223,160,0.25)}
+.story-sub{font-family:'Lora',serif;font-size:14px;color:#C4A87A;line-height:1.8;font-style:italic}
+.story-btn{margin-top:8px;padding:14px 32px;background:linear-gradient(135deg,#C9993A,#A07820);color:#FDF6EC;border:none;border-radius:28px;font-family:'Dancing Script',cursive;font-size:18px;cursor:pointer;transition:transform 0.2s,box-shadow 0.2s;box-shadow:0 4px 20px rgba(201,153,58,0.45);-webkit-tap-highlight-color:transparent}
+.story-btn:active{transform:scale(0.96)}
+.briefcase-anim{font-size:56px;animation:bounceIn 0.9s cubic-bezier(0.34,1.56,0.64,1) both}
+@keyframes bounceIn{0%{transform:scale(0);opacity:0}100%{transform:scale(1);opacity:1}}
+.sparkle-row{display:flex;gap:10px;font-size:22px;animation:fadeUp 0.8s 0.3s both}
+.pill-list{display:flex;flex-direction:column;gap:10px;width:100%;text-align:left;max-width:320px}
+.pill{background:rgba(201,153,58,0.1);border:1px solid rgba(201,153,58,0.25);border-radius:14px;padding:12px 18px;font-family:'Lora',serif;font-size:13px;color:#D4B07A;line-height:1.6}
+
+/* LETTER */
+#letter-scene{display:none;position:fixed;inset:0;z-index:60;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.floating-hearts{position:fixed;inset:0;pointer-events:none;z-index:61}
+.fheart{position:fixed;opacity:0;animation:floatUp linear infinite}
+@keyframes floatUp{0%{opacity:0;transform:translateY(100vh) scale(0.5)}10%{opacity:0.8}80%{opacity:0.4}100%{opacity:0;transform:translateY(-15vh) scale(1.3)}}
+#paper{background:linear-gradient(170deg,#FDF6EC 0%,#FAF0DC 40%,#F5E8CF 100%);min-height:100%;position:relative}
+#paper::before{content:'';position:absolute;inset:0;background-image:repeating-linear-gradient(transparent,transparent 27px,rgba(193,150,90,0.11) 28px);pointer-events:none}
+.paper-fold{height:56px;background:linear-gradient(135deg,#FDF6EC,#F0E0BB,#FDF6EC);animation:unfold 1s ease both}
+@keyframes unfold{from{height:0;opacity:0}to{height:56px;opacity:1}}
+.letter-inner{padding:36px 28px 64px;max-width:440px;margin:0 auto;position:relative}
+.letter-header{text-align:center;margin-bottom:28px}
+.sunflower-deco{font-size:30px;display:inline-block;animation:slowSpin 10s linear infinite}
+@keyframes slowSpin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.letter-title{font-family:'Dancing Script',cursive;font-size:34px;color:#8B5E3C;margin:8px 0 4px;text-shadow:0 2px 8px rgba(139,94,60,0.2)}
+.letter-date{font-family:'Lora',serif;font-size:12px;color:#C4A87A;font-style:italic}
+.letter-body{font-family:'Dancing Script',cursive;font-size:18px;color:#4A2C1A;line-height:2.1}
+.letter-body p{margin-bottom:20px;opacity:0;transform:translateY(12px);transition:opacity 0.7s,transform 0.7s}
+.letter-body p.vis{opacity:1;transform:translateY(0)}
+.bold-gold{font-weight:700;color:#7A4020;font-size:20px}
+.italic-soft{font-style:italic;color:#7A4E2D}
+.divider{text-align:center;margin:20px 0;color:#C9993A;font-size:18px;letter-spacing:8px;opacity:0.55}
+.lsection{background:rgba(201,153,58,0.07);border-left:3px solid rgba(201,153,58,0.35);border-radius:0 10px 10px 0;padding:14px 18px;margin:18px 0;font-family:'Dancing Script',cursive;font-size:17px;color:#5A3520;line-height:2.1}
+.ending-card{background:linear-gradient(135deg,rgba(201,153,58,0.1),rgba(244,197,192,0.15));border-radius:18px;padding:26px;margin:24px 0;text-align:center;border:1px solid rgba(201,153,58,0.22)}
+.ending-big{font-family:'Dancing Script',cursive;font-size:28px;color:#8B5E3C;line-height:1.6}
+.letter-sig{font-family:'Dancing Script',cursive;font-size:28px;color:#8B5E3C;text-align:right;margin-top:32px;padding-right:12px;font-weight:700}
+.end-btn{display:block;margin:32px auto 0;padding:14px 32px;background:linear-gradient(135deg,#C9993A,#A07820);color:#FDF6EC;border:none;border-radius:28px;font-family:'Dancing Script',cursive;font-size:18px;cursor:pointer;box-shadow:0 4px 20px rgba(201,153,58,0.4)}
+.end-btn:active{transform:scale(0.97)}
+
+/* SUNSET */
+#sunset{display:none;position:fixed;inset:0;z-index:100;background:linear-gradient(180deg,#FF6B35 0%,#F7931E 18%,#FFD700 48%,#FF8C69 78%,#C0392B 100%);align-items:center;justify-content:center;flex-direction:column;animation:fadeIn 1.5s ease both}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.sunset-hearts{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.sunset-msg{font-family:'Dancing Script',cursive;text-align:center;color:#FFF8E7;text-shadow:0 2px 14px rgba(0,0,0,0.3);padding:32px;z-index:1}
+.sline{font-size:20px;margin:12px 8px;opacity:0;animation:fadeUp 0.9s both}
+.sbig{font-size:30px;font-weight:700}
+</style>
+</head>
+<body>
+
+<div id="bg-gradient"></div>
+<canvas id="particles"></canvas>
+
+<!-- ENVELOPE SCENE -->
+<div id="scene">
+  <div class="to-from">
+    <div>To: <strong>My Favourite Sakka 💛</strong></div>
+    <div>From: <strong>Nee Sakhi 🌻</strong></div>
+  </div>
+  <div id="envelope-wrap" onclick="openEnvelope()">
+    <div class="env-glow"></div>
+    <div class="env-body">
+      <div class="env-left"></div>
+      <div class="env-right"></div>
+    </div>
+    <div class="env-flap" id="flap"></div>
+    <div class="env-seal" id="seal">💛</div>
+  </div>
+  <div id="click-hint">✨ tap to open ✨</div>
+</div>
+
+<!-- STORY SCREENS -->
+<div id="story">
+  <div class="story-screen active" id="s1">
+    <div class="story-icon">☀️</div>
+    <div class="story-title">Good Morning Masteruuuu ☀️💛</div>
+    <div class="story-sub">Nidra lechava? 👀</div>
+    <button class="story-btn" onclick="nextScreen(2)">Continue 💛</button>
+  </div>
+  <div class="story-screen" id="s2">
+    <div class="story-icon">🚀</div>
+    <div class="story-title">Are you ready? 🚀</div>
+    <div class="story-sub">Because today is not just another day...</div>
+    <button class="story-btn" onclick="nextScreen(3)">Tell me more 🌻</button>
+  </div>
+  <div class="story-screen" id="s3">
+    <div class="briefcase-anim">💼</div>
+    <div class="sparkle-row">✨🌟💫⭐✨</div>
+    <div class="story-title">You're officially a corporate boy now 💼✨</div>
+    <div class="story-sub">Look at him ... 🥹</div>
+    <button class="story-btn" onclick="nextScreen(4)">Next 😊</button>
+  </div>
+  <div class="story-screen" id="s4">
+    <div class="story-icon">🤭</div>
+    <div class="story-title">One important question...</div>
+    <div class="story-sub">Will you remember your Sakhi when...</div>
+    <div class="pill-list">
+      <div class="pill">💼 ur busy with work? 😂</div>
+      <div class="pill">👫 Office friends steal your time?</div>
+      <div class="pill">🌃 Bangalore starts showing off?</div>
+    </div>
+    <div style="display:flex;gap:15px;justify-content:center;margin-top:15px;flex-wrap:wrap">
+
+  <button class="story-btn" onclick="openLetter()">
+    Of Course ❤️
+  </button>
+
+  <button class="story-btn" onclick="showJoke()">
+    No 😏
+  </button>
+
+</div>
+  </div>
+</div>
+
+<!-- LETTER SCENE -->
+<div id="letter-scene">
+  <div class="floating-hearts" id="fhearts"></div>
+  <div id="paper">
+    <div class="paper-fold"></div>
+    <div class="letter-inner">
+      <div class="letter-header">
+        <div class="sunflower-deco">🌻</div>
+        <div class="letter-title">A Letter For You 💛</div>
+        <div class="letter-date">Your First Day &middot; With all my heart 🌻</div>
+      </div>
+      <div class="letter-body" id="lbody">
+        <p>Oyeeee 🌻💛</p>
+        <p><span class="bold-gold">ALL THE BESTTTT NANNALUUUU! 🥹💛✨</span><br>Today's your day. 💼🚀</p>
+        <p>And before anything else...<br><span class="bold-gold">I'm cho cho cho proud of you. 🥹🌻</span></p>
+        <p>Seeing you start this new chapter makes me genuinely so happy. Sometimes I just sit and think, <span class="italic-soft">"Wow... look at him ."</span> 🥹✨</p>
+        <p>Not because of the job.<br>Not because of the office.<br>Not because of Bangalore.<br><br>But because of the person you are. 💛</p>
+        <p>The way you dream, the way you care about your future andulo nen kuda unna annukoo, the way you keep moving forward... that's what makes me proud.</p>
+        <p>And now look at you...<br><span class="bold-gold">Corporate boy officially loading. 🤭💼</span></p>
+        <div class="divider">· · · 🌻 · · ·</div>
+        <p>So first things first...<br><span class="bold-gold">Have lots of fun in Bangalore. 🌃✨</span></p>
+        <div class="lsection">
+          🍽️ Baaga thinu.<br>
+          🗺️ New places explore cheyyi.<br>
+          📸 Good memories create chesko.<br>
+          🧣 Enjoy the Bangalore weather (cold, sinus tablets pettuko).<br>
+          🌙 Enjoy the Bangalore night life (ala anni mari enjoy cheyakuuu).<br>
+          ✨ Enjoy this whole new phase of life.
+        </div>
+        <p>You deserve it. 💛</p>
+        <div class="divider">· · · 💛 · · ·</div>
+        <p>And now, officially...<br><span class="bold-gold">#Priority 1 — Work 💼✨</span><br><span class="bold-gold">#Priority 2 — Me 🌻💛</span></p>
+        <p>Yes yes... nenu accept chesesa. 😂<br>Meetings, deadlines, projects, office friends... anni untayi ippudu.</p>
+        <p>Kaani koncham nannu kuda gurtupettuko nannaluu. 🤭💛<br>Naaku telusu nuvvu nannu ignore cheyyavu ani.<br><span class="bold-gold">Kaani bayam naku. 🥹🌻</span></p>
+        <p><span class="italic-soft">Kotha city.<br>Kotha people.<br>Kotha routine.<br>Kotha life.</span><br><br>Appudappudu aa thought vasthundi anthe. 😌💛</p>
+        <p>So nen disturb chesinappudu tittukokandhi sirr garu. Oka small text aina pampu.</p>
+        <div class="lsection">
+          "Busy unna." 📱<br>
+          "Meeting lo unna." 💼<br>
+          "Later call chestha." 💛<br><br>
+          Anything. 🤭💛
+        </div>
+        <p>Inka mari deadlines venaka maree padipoku. 😂<br>Work important eh.<br>Kaani life kuda important.<br>Konchem enjoy cheyyi. Konchem navvu. Konchem chill avvu.</p>
+        <div class="divider">· · · 🌻 · · ·</div>
+        <p>And one very important task...<br><span class="bold-gold">Naaku kuda Bangalore lo manchi job ravali ani koncham manifest cheyyi nannaluu. 🥹🤞💛</span></p>
+        <p>Nuvvu mundhu vellipoyi route check chesthunav anukunta.<br>Nenu kuda tvaralone join avthanu. 😉<br>So save a place for me there. 💼🌻</p>
+        <div class="divider">· · · 💛 · · ·</div>
+        <p>And do you know something? 🤭<br>Around 4 years back nene neeku oka nickname pettanu.<br>Insta lo ala save cheskunna...<br><span class="italic-soft">Mari nuvvu eppudaina chusavo ledo naaku telidhu. 😂💛</span></p>
+        <div class="divider">· · · 🌻 · · ·</div>
+        <p>And one more office policy... 🤭💛<br><span class="bold-gold">Daily updates are mandatory. 🌻📋</span></p>
+        <div class="lsection">
+          ☀️ Morning office ki vellina,<br>
+          🍱 Lunch lo em tinnavo,<br>
+          👥 Evaritho friendship chesavo,<br>
+          😂 Roju lo funniest incident enti...<br><br>
+          Naaku report submit cheyyali. 😂💛
+        </div>
+        <p>Attendance office ki maatrame kaadhu sir...<br><span class="bold-gold">Nee Sakhi daggara kuda maintain cheyyali. 🤭🌻</span></p>
+        <div class="divider">· · · 💛 · · ·</div>
+        <div class="ending-card">
+          <div class="ending-big">Love youuuuu nannaluuuu. 🥹💛</div>
+          <br>
+          <div style="font-family:'Lora',serif;font-size:14px;color:#7A4E2D;line-height:2">
+            Cho cho cho proud of you.<br>
+            Enjoy your first day.<br>
+            Enjoy Bangalore.<br>
+            And go shine like you always do. ✨🌻
+          </div>
+        </div>
+        <div class="divider">· · · 🌻💛🌻 · · ·</div>
+        <div class="letter-sig">— Nee Sakhi 💛</div>
+        <button class="end-btn" onclick="showSunset()">Continue to ending ✨</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SUNSET ENDING -->
+<div id="sunset">
+  <div class="sunset-hearts" id="shearts"></div>
+
+  <div class="sunset-msg">
+
+    <div class="sline" style="animation-delay:0.3s">
+      Before this little story ends...
+    </div>
+
+    <div class="sline" style="animation-delay:1.5s;font-size:18px">
+      Just remember that somewhere,
+      there's a girl smiling because of you. 🌻💛
+    </div>
+
+    <div class="sline" style="animation-delay:3s;font-size:18px">
+      Keep chasing your dreams, collecting victories,
+      and creating stories worth telling. ✨
+    </div>
+
+    <div class="sline" style="animation-delay:4.5s;font-size:18px">
+      One day we'll look back at this phase and smile,
+      knowing every step was worth it. 🌇
+    </div>
+
+    <div class="sline sbig" style="animation-delay:6s">
+      Cho cho cho proud of you.<br>
+      Today. Tomorrow. Always. 💛
+    </div>
+
+    <div class="sline" style="animation-delay:7.5s;font-style:italic;font-size:18px">
+      And Oye...
+      love you a little more than words can explain. 🌻✨
+    </div>
+
+    <div class="sline" style="animation-delay:9s;font-size:15px;opacity:0.85">
+      — Nee Sakhi 💛
+    </div>
+
+  </div>
+</div>
+
+<script>
+    function showJoke(){
+  document.getElementById('s4').innerHTML = `
+    <div class="story-icon">😒</div>
+
+    <div class="story-title">
+      Joke chesav kada? 😂
+    </div>
+
+    <div class="story-sub">
+      Nuvvu ni Sakhi ni marchipothava?<br>
+      Adi nenu nammala? 🤨🌻
+    </div>
+
+    <button class="story-btn" onclick="openLetter()">
+      Sare Sare... Open Letter 💛
+    </button>
+  `;
+}
+// PARTICLES
+var canvas=document.getElementById('particles'),ctx=canvas.getContext('2d'),W,H,pts=[];
+function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight}
+resize();window.addEventListener('resize',resize);
+function Pt(){this.x=Math.random()*W;this.y=Math.random()*H;this.r=Math.random()*2+0.4;this.vy=-(Math.random()*0.5+0.15);this.vx=(Math.random()-0.5)*0.25;this.a=Math.random()*0.55+0.15;this.heart=Math.random()<0.15;this.c=Math.random()<0.5?'rgba(201,153,58,':'rgba(240,197,130,'}
+for(var i=0;i<80;i++)pts.push(new Pt());
+function dh(x,y,s,a,c){ctx.save();ctx.globalAlpha=a;ctx.fillStyle=c+'0.8)';ctx.beginPath();ctx.moveTo(x,y+s/4);ctx.bezierCurveTo(x,y,x-s/2,y,x-s/2,y+s/4);ctx.bezierCurveTo(x-s/2,y+s/2,x,y+s*0.75,x,y+s);ctx.bezierCurveTo(x,y+s*0.75,x+s/2,y+s/2,x+s/2,y+s/4);ctx.bezierCurveTo(x+s/2,y,x,y,x,y+s/4);ctx.fill();ctx.restore()}
+function tick(){ctx.clearRect(0,0,W,H);pts.forEach(function(p){p.y+=p.vy;p.x+=p.vx;if(p.y<-12){p.y=H+12;p.x=Math.random()*W}if(p.heart){dh(p.x,p.y,8,p.a,p.c)}else{ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=p.c+p.a+')';ctx.fill()}});requestAnimationFrame(tick)}
+tick();
+
+// ENVELOPE
+function openEnvelope(){
+  document.getElementById('flap').classList.add('open');
+  document.getElementById('seal').style.opacity='0';
+  setTimeout(function(){
+    document.getElementById('scene').style.display='none';
+    var s=document.getElementById('story');
+    s.style.display='flex';
+  },950);
+}
+
+// STORY
+var cur=1;
+function nextScreen(n){
+  document.getElementById('s'+cur).classList.remove('active');
+  setTimeout(function(){document.getElementById('s'+n).classList.add('active');cur=n},220);
+}
+
+// LETTER
+function openLetter(){
+  document.getElementById('story').style.display='none';
+  var ls=document.getElementById('letter-scene');
+  ls.style.display='block';
+  spawnHearts('fhearts',12);
+  setTimeout(animParas,350);
+}
+function animParas(){
+  var ps=document.querySelectorAll('#lbody p');
+  ps.forEach(function(p,i){setTimeout(function(){p.classList.add('vis')},i*160)});
+}
+function spawnHearts(id,count){
+  var c=document.getElementById(id);
+  var em=['💛','🌻','✨','💫','🌟'];
+  for(var i=0;i<count;i++){
+    var h=document.createElement('div');
+    h.className='fheart';
+    h.textContent=em[Math.floor(Math.random()*em.length)];
+    h.style.left=Math.random()*100+'vw';
+    h.style.fontSize=(11+Math.random()*9)+'px';
+    h.style.animationDuration=(9+Math.random()*10)+'s';
+    h.style.animationDelay=(Math.random()*9)+'s';
+    c.appendChild(h);
+  }
+}
+
+// SUNSET
+function showSunset(){
+  var s=document.getElementById('sunset');
+  s.style.display='flex';
+  var c=document.getElementById('shearts');
+  var em=['💛','🌻','✨','💫','❤️'];
+  for(var i=0;i<24;i++){
+    var h=document.createElement('div');
+    h.style.cssText='position:absolute;font-size:'+(13+Math.random()*14)+'px;left:'+Math.random()*100+'%;top:'+Math.random()*100+'%;animation:floatUp '+(7+Math.random()*8)+'s '+(Math.random()*6)+'s linear infinite;opacity:0';
+    h.textContent=em[Math.floor(Math.random()*em.length)];
+    c.appendChild(h);
+  }
+}
+</script>
+</body>
+</html>
